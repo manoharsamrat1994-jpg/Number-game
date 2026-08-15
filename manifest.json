@@ -1,0 +1,10 @@
+{
+  "name": "Number Game Offline",
+  "short_name": "Number Game",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef3f7",
+  "theme_color": "#17324d",
+  "description": "Offline number betting calculator",
+  "lang": "hi"
+}

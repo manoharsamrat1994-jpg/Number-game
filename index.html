@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#17324d">
+    <link rel="manifest" href="manifest.json">
+
+    <title>Number Game</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef3f7;
+            text-align: center;
+            color: #17324d;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .round {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .numbers {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 7px;
+        }
+
+        .number {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #000000;
+            font-size: 16px;
+            cursor: pointer;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number-value {
+            font-weight: bold;
+        }
+
+        .number-amount {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .number:hover {
+            background: #ddd;
+        }
+
+        .number.selected {
+            background: #4CAF50;
+            color: white;
+            border: 2px solid #2E7D32;
+        }
+
+        .number.selected .number-amount {
+            color: white;
+        }
+
+        .number.winning {
+            background: #FFD700;
+            color: #000;
+            border: 2px solid #FFC700;
+        }
+
+        .number.winning .number-amount {
+            color: #000;
+        }
+
+        .number.lowest {
+            background: #FFF176;
+            color: #000;
+            border: 2px solid #FBC02D;
+            font-weight: bold;
+        }
+
+        .number.lowest .number-amount {
+            color: #000;
+            font-weight: bold;
+        }
+
+        .number-tables {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .number-table-group {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .number-table-group h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .number-table-total {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        .number-table {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .table-number {
+            min-width: 58px;
+            padding: 8px 5px;
+            margin: 0;
+            font-size: 14px;
+            background: #f5f5f5;
+            color: #222;
+            border: 1px solid #ddd;
+        }
+
+        .table-number .number-amount {
+            display: block;
+        }
+
+        .table-number.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #2E7D32;
+        }
+
+        .table-number.selected .number-amount {
+            color: white;
+        }
+
+        .selected-number,
+        .player-entry,
+        .draw-entry,
+        .selections {
+            margin: 20px 0;
+        }
+
+        .player-entry,
+        .draw-entry {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .player-entry input,
+        .draw-entry input {
+            padding: 12px 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 200px;
+            font-size: 16px;
+        }
+
+        #currentPlayer {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .selections {
+            text-align: left;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .selections h2 {
+            margin-top: 0;
+        }
+
+        .grand-total {
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .breakdown {
+            text-align: left;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .breakdown h2 {
+            margin-top: 0;
+        }
+
+        .player-columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .player-column {
+            background: #f5f5f5;
+            border: 2px solid #222;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .player-column h3 {
+            background: #222;
+            color: white;
+            margin: -10px -10px 10px -10px;
+            padding: 10px;
+            border-radius: 6px 6px 0 0;
+            font-size: 14px;
+        }
+
+        .player-column table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .player-column th {
+            background: #e0e0e0;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 2px solid #222;
+            font-weight: bold;
+        }
+
+        .player-column td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .player-column tr:last-child td {
+            border-bottom: none;
+        }
+
+        .player-column .total-row {
+            background: #e3f2fd;
+            border-top: 2px solid #222;
+            border-bottom: 2px solid #222;
+            font-weight: bold;
+        }
+
+        .top-bar {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            margin-bottom: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:disabled {
+            background: #b23a3a;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .winning-number {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .status {
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .winner-info {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .history {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .new-round {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .round {
+                font-size: 15px;
+                margin-bottom: 12px;
+            }
+
+            .top-bar {
+                position: static;
+                justify-content: center;
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .numbers {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
+            }
+
+            .number {
+                min-height: 52px;
+                padding: 8px 2px;
+                font-size: 14px;
+            }
+
+            .player-entry,
+            .draw-entry {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 7px;
+            }
+
+            .player-entry input,
+            .draw-entry input,
+            .player-entry button,
+            .draw-entry button {
+                width: 100%;
+                margin: 0;
+            }
+
+            #currentPlayer {
+                grid-column: 1 / -1;
+                padding: 8px 0;
+            }
+
+            .number-tables {
+                gap: 10px;
+            }
+
+            .number-table-group {
+                padding: 10px;
+            }
+
+            .number-table-group h2 {
+                font-size: 16px;
+            }
+
+            .table-number {
+                min-width: 50px;
+                padding: 8px 3px;
+                font-size: 13px;
+            }
+
+            .breakdown,
+            .selections,
+            .result,
+            .history {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+        <div class="top-bar" id="topBar">
+            <div id="topGrand">Total Amount: ₹0</div>
+            <div id="topMin">Lowest: None</div>
+            <div id="topLowestPlayers">Lowest Bets: 0 players</div>
+            <div id="topMultiplied">Lowest ×100: ₹0</div>
+        </div>
+
+    <h1>NUMBER GAME</h1>
+
+    <div class="round">
+        ROUND #<span id="roundNumber">0001</span>
+    </div>
+
+    <div class="numbers" id="numbers"></div>
+
+    <div class="number-tables" id="numberTables"></div>
+
+    <div class="player-entry">
+        <input id="playerNameInput" type="text" placeholder="Player Name" />
+        <div id="currentPlayer">Current Player: None | Total: ₹0</div>
+        <input id="amountInput" type="number" min="0" placeholder="Amount" />
+        <button id="addNumberButton" disabled>
+            ADD NUMBER
+        </button>
+        <button id="addSelectedButton" disabled>
+            ADD SELECTED
+        </button>
+        <button id="clearSelectedButton" disabled>
+            CLEAR
+        </button>
+        <button id="nextPlayerButton">
+            NEXT PLAYER
+        </button>
+    </div>
+
+    <div class="selected-number">
+        Selected Numbers:
+        <span id="selected">None</span>
+    </div>
+
+    <div class="selections">
+        <h2>SELECTED NUMBERS</h2>
+        <div id="selectionList">No selections yet</div>
+        <div id="selectionCounts"></div>
+        <div id="minAmountInfo">Lowest amount number: None</div>
+        <div id="maxAmountInfo">Highest amount number: None</div>
+        <div id="grandTotal" class="grand-total">Total Amount: ₹0</div>
+    </div>
+
+    <div class="breakdown">
+        <h2>DETAILED BREAKDOWN (Player-wise)</h2>
+        <div id="breakdownContainer"></div>
+    </div>
+
+    <div class="result">
+
+        <div>WINNING NUMBER</div>
+
+        <div class="winning-number" id="result">
+            ?
+        </div>
+
+        <div class="status" id="status">
+            Round Open
+        </div>
+
+        <div class="draw-entry">
+            <input id="drawNumberInput" type="number" min="0" max="100" placeholder="Winning number" />
+            <button id="drawButton">
+                DRAW
+            </button>
+        </div>
+
+        <div class="winner-info" id="winnerInfo">
+            No winners yet.
+        </div>
+
+    </div>
+
+    <div class="new-round">
+        <button id="newRoundButton">
+            NEW ROUND
+        </button>
+    </div>
+
+    <div class="history">
+
+        <h2>PREVIOUS RESULTS</h2>
+
+        <div id="historyList">
+            No previous results
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+    let selectedNumber = null;
+    let selectedNumbers = [];
+    let roundNumber = 1;
+    let roundClosed = false;
+    let winningNumber = null;
+    let lowestNumber = null;
+    let history = [];
+
+    const numbersContainer = document.getElementById("numbers");
+    const numberTablesContainer = document.getElementById("numberTables");
+    const selectedDisplay = document.getElementById("selected");
+    const addNumberButton = document.getElementById("addNumberButton");
+    const addSelectedButton = document.getElementById("addSelectedButton");
+    const clearSelectedButton = document.getElementById("clearSelectedButton");
+    const playerNameInput = document.getElementById("playerNameInput");
+    const currentPlayerDisplay = document.getElementById("currentPlayer");
+    const nextPlayerButton = document.getElementById("nextPlayerButton");
+    const amountInput = document.getElementById("amountInput");
+    const drawNumberInput = document.getElementById("drawNumberInput");
+    const selectionList = document.getElementById("selectionList");
+    const selectionCounts = document.getElementById("selectionCounts");
+    const winnerInfo = document.getElementById("winnerInfo");
+    const drawButton = document.getElementById("drawButton");
+    const newRoundButton = document.getElementById("newRoundButton");
+    const resultDisplay = document.getElementById("result");
+    const statusDisplay = document.getElementById("status");
+    const roundDisplay = document.getElementById("roundNumber");
+    const historyList = document.getElementById("historyList");
+    const topGrand = document.getElementById('topGrand');
+    const topMin = document.getElementById('topMin');
+    const topLowestPlayers = document.getElementById('topLowestPlayers');
+    const topMultiplied = document.getElementById('topMultiplied');
+    const breakdownContainer = document.getElementById("breakdownContainer");
+
+    const players = {};
+    const amountTotals = {};
+    let playerCount = 0;
+    let currentPlayer = null;
+    const offlineStorageKey = "number-game-offline-state";
+
+    function saveOfflineState() {
+        if (socket) return;
+        localStorage.setItem(offlineStorageKey, JSON.stringify({
+            players: players,
+            history: history,
+            roundNumber: roundNumber,
+            roundClosed: roundClosed,
+            winningNumber: winningNumber
+        }));
+    }
+
+    function loadOfflineState() {
+        if (socket) return false;
+        try {
+            const saved = JSON.parse(localStorage.getItem(offlineStorageKey) || "null");
+            if (!saved || !saved.players) return false;
+            Object.keys(saved.players).forEach(function(key) {
+                players[key] = saved.players[key];
+            });
+            history = saved.history || [];
+            roundNumber = saved.roundNumber || 1;
+            roundClosed = saved.roundClosed || false;
+            winningNumber = saved.winningNumber == null ? null : Number(saved.winningNumber);
+            roundDisplay.textContent = String(roundNumber).padStart(4, "0");
+            if (winningNumber !== null) resultDisplay.textContent = winningNumber;
+            return true;
+        } catch (error) {
+            localStorage.removeItem(offlineStorageKey);
+            return false;
+        }
+    }
+
+    // Socket.io client (optional). If Socket.io is not available (file:// or no server), run in offline/local mode.
+    let socket = null;
+    if (typeof io !== 'undefined') {
+        socket = io();
+
+        socket.on('joined', function(data) {
+            // data.name is like 'Player 1' -> pass index to setCurrentPlayer
+            const idx = Number(String(data.name).replace('Player ', '').trim()) || 1;
+            setCurrentPlayer(idx);
+        });
+
+        socket.on('state', function(data) {
+            // replace local players, totals and history with server state
+            Object.keys(players).forEach(function(k){ delete players[k]; });
+            Object.keys(data.players || {}).forEach(function(k){ players[k] = data.players[k]; });
+
+            Object.keys(amountTotals).forEach(function(k){ delete amountTotals[k]; });
+            Object.keys(data.amountTotals || {}).forEach(function(k){ amountTotals[k] = data.amountTotals[k]; });
+
+            history = data.history || [];
+            roundNumber = data.roundNumber || roundNumber;
+            roundClosed = data.roundClosed || false;
+            resultDisplay.textContent = data.result == null ? '?' : data.result;
+
+            // show server grand total if provided
+            if (typeof data.grandTotal !== 'undefined') {
+                document.getElementById('grandTotal').textContent = 'Total Amount: ₹' + data.grandTotal;
+                if (topGrand) topGrand.textContent = 'Total Amount: ₹' + data.grandTotal;
+            }
+
+            updateSelections();
+            updateHistory();
+
+            if (roundClosed) {
+                statusDisplay.textContent = 'Round Closed';
+                winningNumber = data.result == null ? null : Number(data.result);
+                if (winningNumber !== null) updateDrawDetails(winningNumber);
+            } else {
+                statusDisplay.textContent = 'Round Open';
+                winnerInfo.textContent = 'No winners yet.';
+            }
+        });
+    } else {
+        // offline: initialize first local player
+        playerCount = 0;
+        if (!loadOfflineState()) setCurrentPlayer(1);
+        else if (Object.keys(players).length > 0) setCurrentPlayer(Object.keys(players)[0]);
+        updateSelections();
+        updateHistory();
+        statusDisplay.textContent = roundClosed ? "Round Closed" : "Round Open";
+        if (roundClosed && winningNumber !== null) updateDrawDetails(winningNumber);
+    }
+
+    function createNumbers() {
+        numbersContainer.innerHTML = "";
+        for (let i = 0; i <= 100; i++) {
+            const button = document.createElement("button");
+            button.className = "number";
+            
+            const numberValue = document.createElement("span");
+            numberValue.className = "number-value";
+            numberValue.textContent = i;
+            
+            const numberCount = document.createElement("span");
+            numberCount.className = "number-amount";
+            // Count how many unique players bet on this number
+            let playerCount = 0;
+            Object.keys(players).forEach(function(playerName) {
+                if (players[playerName].counts[i]) {
+                    playerCount++;
+                }
+            });
+            const amt = amountTotals[i] || 0;
+            numberCount.textContent = playerCount > 0 ? playerCount + " | ₹" + amt : "";
+            
+            button.appendChild(numberValue);
+            button.appendChild(numberCount);
+            
+            // Check if this number is the winning number
+            if (winningNumber !== null && i === winningNumber) {
+                button.classList.add("winning");
+            }
+            
+            // Show the lowest amount highlight only after the draw.
+            if (roundClosed && lowestNumber !== null && i === lowestNumber) {
+                button.classList.add("lowest");
+            }
+            
+            // Check if this number is in selected numbers
+            if (selectedNumbers.indexOf(i) !== -1) {
+                button.classList.add("selected");
+            }
+            
+            button.addEventListener("click", function () {
+                if (roundClosed) return;
+                toggleNumberSelection(i, button);
+                createNumberTables();
+            });
+            numbersContainer.appendChild(button);
+        }
+        createNumberTables();
+    }
+
+    function toggleNumberSelection(number, button) {
+        const index = selectedNumbers.indexOf(number);
+        if (index !== -1) {
+            selectedNumbers.splice(index, 1);
+            button.classList.remove("selected");
+        } else {
+            selectedNumbers.push(number);
+            button.classList.add("selected");
+        }
+        updateSelectedDisplay();
+    }
+
+    function selectNumberFromTable(number, button) {
+        if (roundClosed) return;
+        toggleNumberSelection(number, button);
+        updateSelectedDisplay();
+        amountInput.focus();
+    }
+
+    function createNumberTables() {
+        numberTablesContainer.innerHTML = "";
+
+        const groups = [
+            { title: "जोड़ी वाले नंबर", numbers: [11, 22, 33, 44, 55, 66, 77, 88, 99] },
+            { title: "उलट-पलट वाले नंबर", numbers: [] }
+        ];
+
+        for (let first = 0; first <= 9; first++) {
+            for (let second = first + 1; second <= 9; second++) {
+                groups[1].numbers.push(first * 10 + second, second * 10 + first);
+            }
+        }
+
+        groups.forEach(function(group) {
+            const section = document.createElement("section");
+            section.className = "number-table-group";
+            const heading = document.createElement("h2");
+            heading.textContent = group.title;
+            section.appendChild(heading);
+            section.appendChild(createNumberTable(group.numbers));
+            section.appendChild(createTableTotal(group.numbers));
+            numberTablesContainer.appendChild(section);
+        });
+
+        for (let digit = 0; digit <= 9; digit++) {
+            const numbers = [];
+            for (let number = digit; number <= 100; number += 10) {
+                numbers.push(number);
+            }
+            const section = document.createElement("section");
+            section.className = "number-table-group";
+            const heading = document.createElement("h2");
+            heading.textContent = digit + " से जुड़े नंबर";
+            section.appendChild(heading);
+            section.appendChild(createNumberTable(numbers));
+            section.appendChild(createTableTotal(numbers));
+            numberTablesContainer.appendChild(section);
+        }
+    }
+
+    function createTableTotal(numbers) {
+        const total = numbers.reduce(function(sum, number) {
+            return sum + (amountTotals[number] || 0);
+        }, 0);
+        const totalDisplay = document.createElement("div");
+        totalDisplay.className = "number-table-total";
+        totalDisplay.textContent = "Table Total: ₹" + total;
+        return totalDisplay;
+    }
+
+    function createNumberTable(numbers) {
+        const table = document.createElement("div");
+        table.className = "number-table";
+        numbers.forEach(function(number) {
+            const button = document.createElement("button");
+            button.className = "table-number";
+            button.type = "button";
+            button.textContent = number;
+            const amount = amountTotals[number] || 0;
+            if (amount > 0) {
+                const amountDisplay = document.createElement("span");
+                amountDisplay.className = "number-amount";
+                amountDisplay.textContent = "₹" + amount;
+                button.appendChild(amountDisplay);
+            }
+            if (selectedNumbers.indexOf(number) !== -1) {
+                button.classList.add("selected");
+            }
+            button.addEventListener("click", function() {
+                selectNumberFromTable(number, button);
+            });
+            table.appendChild(button);
+        });
+        return table;
+    }
+
+    function setCurrentPlayer(playerName) {
+        currentPlayer = playerName || "Player " + (Object.keys(players).length + 1);
+        if (!players[currentPlayer]) {
+            players[currentPlayer] = { name: currentPlayer, counts: {}, amounts: {} };
+        }
+        updateCurrentPlayerTotal();
+    }
+
+    function updateCurrentPlayerTotal() {
+        const player = currentPlayer ? players[currentPlayer] : null;
+        const total = player ? Object.keys(player.amounts).reduce(function(sum, number) {
+            return sum + (player.amounts[number] || 0);
+        }, 0) : 0;
+        currentPlayerDisplay.textContent = "Current Player: " + (currentPlayer || "None") + " | Total: ₹" + total;
+    }
+
+    function resetSelection() {
+        selectedNumber = null;
+        selectedNumbers = [];
+        selectedDisplay.textContent = "None";
+        addNumberButton.disabled = true;
+        addSelectedButton.disabled = true;
+        clearSelectedButton.disabled = true;
+        amountInput.value = "";
+        document.querySelectorAll(".number").forEach(function(btn) {
+            btn.classList.remove("selected");
+        });
+        createNumberTables();
+    }
+
+    function updateSelectedDisplay() {
+        if (selectedNumbers.length === 0) {
+            selectedDisplay.textContent = "None";
+            addNumberButton.disabled = true;
+            addSelectedButton.disabled = true;
+            clearSelectedButton.disabled = true;
+        } else if (selectedNumbers.length === 1) {
+            selectedDisplay.textContent = selectedNumbers[0];
+            addNumberButton.disabled = false;
+            addSelectedButton.disabled = false;
+            clearSelectedButton.disabled = false;
+        } else {
+            selectedDisplay.textContent = selectedNumbers.sort(function(a, b) { return a - b; }).join(", ");
+            addNumberButton.disabled = true;
+            addSelectedButton.disabled = false;
+            clearSelectedButton.disabled = false;
+        }
+    }
+
+    function updateSelections() {
+        // reset aggregated totals to avoid double-counting
+        Object.keys(amountTotals).forEach(function(k){ delete amountTotals[k]; });
+        const playerKeys = Object.keys(players);
+        if (playerKeys.length === 0) {
+            selectionList.textContent = "No selections yet";
+            selectionCounts.textContent = "";
+            document.getElementById('minAmountInfo').textContent = 'Lowest amount number: None';
+            document.getElementById('grandTotal').textContent = 'Total Amount: ₹0';
+            lowestNumber = null;
+            if (topMin) topMin.textContent = 'Lowest: None';
+            if (topMultiplied) topMultiplied.textContent = 'Lowest ×100: ₹0';
+            updateCurrentPlayerTotal();
+            createNumbers();
+            return;
+        }
+
+        selectionList.innerHTML = "";
+        const counts = {};
+
+        playerKeys.forEach(function(serialName) {
+            const player = players[serialName];
+            const numberEntries = Object.keys(player.counts)
+                .sort(function(a, b) { return a - b; })
+                .map(function(number) {
+                    const count = player.counts[number];
+                    const amt = player.amounts[number] || 0;
+                    return number + (count > 1 ? " (x" + count + ", ₹" + amt + ")" : (amt ? " (₹" + amt + ")" : ""));
+                });
+
+            const div = document.createElement("div");
+            div.textContent = player.name + " → " + numberEntries.join(", ");
+            selectionList.appendChild(div);
+
+            Object.keys(player.counts).forEach(function(number) {
+                counts[number] = (counts[number] || 0) + player.counts[number];
+                amountTotals[number] = (amountTotals[number] || 0) + (player.amounts[number] || 0);
+            });
+        });
+
+        const countStrings = Object.keys(counts)
+            .sort(function(a, b) { return a - b; })
+            .map(function(number) {
+                return number + ": " + counts[number];
+            });
+
+        const amountStrings = Object.keys(amountTotals)
+            .sort(function(a, b) { return a - b; })
+            .map(function(number) {
+                return number + ": ₹" + amountTotals[number];
+            });
+
+        selectionCounts.textContent = "Count per number: " + countStrings.join(", ") + " | Amounts: " + amountStrings.join(", ");
+
+        // find minimum total amount number
+        const nums = Object.keys(amountTotals).map(function(n){ return {n: Number(n), amt: amountTotals[n]}; }).filter(function(o){ return o.amt > 0; });
+        if (nums.length === 0) {
+            document.getElementById('minAmountInfo').textContent = 'Lowest amount number: None';
+            document.getElementById('grandTotal').textContent = 'Total Amount: ₹0';
+            if (topMin) topMin.textContent = 'Lowest: None';
+            if (topLowestPlayers) topLowestPlayers.textContent = 'Lowest Bets: 0 players';
+            if (topGrand) topGrand.textContent = 'Total Amount: ₹0';
+            if (topMultiplied) topMultiplied.textContent = 'Lowest ×100: ₹0';
+            lowestNumber = null;
+        } else {
+            nums.sort(function(a,b){ return a.amt - b.amt || a.n - b.n; });
+            const min = nums[0];
+            lowestNumber = min.n;
+            const multipliedAmount = min.amt * 100;
+            const lowestBetPlayers = playerKeys.filter(function(playerName) {
+                return (players[playerName].amounts[min.n] || 0) > 0;
+            }).length;
+            document.getElementById('minAmountInfo').textContent = 'Lowest amount number: ' + min.n + ' (₹' + min.amt + ')';
+            // compute grand total
+            const grand = nums.reduce(function(acc, cur){ return acc + cur.amt; }, 0);
+            document.getElementById('grandTotal').textContent = 'Total Amount: ₹' + grand;
+            if (topMin) topMin.textContent = 'Lowest: ' + min.n + ' (₹' + min.amt + ')';
+            if (topLowestPlayers) topLowestPlayers.textContent = 'Lowest Bets: ' + lowestBetPlayers + ' players';
+            if (topGrand) topGrand.textContent = 'Total Amount: ₹' + grand;
+            if (topMultiplied) topMultiplied.textContent = 'Lowest ×100: ₹' + multipliedAmount;
+        }
+        
+        updateBreakdown();
+        updateCurrentPlayerTotal();
+        createNumbers();
+    }
+
+    function updateBreakdown() {
+        const playerKeys = Object.keys(players);
+        breakdownContainer.innerHTML = "";
+        
+        if (playerKeys.length === 0) {
+            breakdownContainer.innerHTML = '<p style="text-align: center; color: #666;">No selections yet</p>';
+            return;
+        }
+        
+        // Create a container for all player columns
+        const columnsDiv = document.createElement("div");
+        columnsDiv.className = "player-columns";
+        
+        let totalGrandAmount = 0;
+        
+        // Create a column for each player
+        playerKeys.forEach(function(playerName) {
+            const player = players[playerName];
+            const numbers = Object.keys(player.counts).sort(function(a, b) { return a - b; });
+            
+            if (numbers.length === 0) return;
+            
+            const playerDiv = document.createElement("div");
+            playerDiv.className = "player-column";
+            
+            // Player name header
+            const playerHeader = document.createElement("h3");
+            playerHeader.textContent = playerName;
+            playerDiv.appendChild(playerHeader);
+            
+            // Player's table
+            const playerTable = document.createElement("table");
+            
+            // Header row
+            const headerRow = playerTable.insertRow();
+            const numHeader = headerRow.insertCell(0);
+            const amtHeader = headerRow.insertCell(1);
+            numHeader.textContent = "Number";
+            amtHeader.textContent = "Amount";
+            numHeader.style.fontWeight = "bold";
+            amtHeader.style.fontWeight = "bold";
+            
+            let playerTotal = 0;
+            
+            // Data rows
+            numbers.forEach(function(number) {
+                const row = playerTable.insertRow();
+                const numCell = row.insertCell(0);
+                const amtCell = row.insertCell(1);
+                
+                const amount = player.amounts[number] || 0;
+                numCell.textContent = number;
+                amtCell.textContent = "₹" + amount;
+                
+                playerTotal += amount;
+                totalGrandAmount += amount;
+            });
+            
+            // Total row for this player
+            const totalRow = playerTable.insertRow();
+            totalRow.className = "total-row";
+            const totalLabelCell = totalRow.insertCell(0);
+            const totalAmtCell = totalRow.insertCell(1);
+            totalLabelCell.textContent = "Total";
+            totalAmtCell.textContent = "₹" + playerTotal;
+            
+            playerDiv.appendChild(playerTable);
+            columnsDiv.appendChild(playerDiv);
+        });
+        
+        breakdownContainer.appendChild(columnsDiv);
+        
+        // Add summary line
+        const summary = document.createElement("p");
+        summary.style.marginTop = "20px";
+        summary.style.fontSize = "16px";
+        summary.style.fontWeight = "bold";
+        summary.innerHTML = `<span style="color: #222;">Total Players: ${playerKeys.length}</span> | <span style="color: #d32f2f;">Grand Total: ₹${totalGrandAmount}</span>`;
+        breakdownContainer.appendChild(summary);
+    }
+
+    addNumberButton.addEventListener("click", function () {
+        if (roundClosed || selectedNumbers.length !== 1) return;
+
+        const amtVal = amountInput.value.trim();
+        const amount = amtVal === "" ? 0 : Number(amtVal);
+        if (Number.isNaN(amount) || amount < 0) {
+            alert('कृपया वैध राशि डालें।');
+            return;
+        }
+
+        if (socket) {
+            socket.emit('addNumber', { number: selectedNumbers[0], amount: amount });
+            resetSelection();
+            return;
+        }
+
+        // Offline/local mode: update local players structure
+        if (!currentPlayer) {
+            alert("कृपया पहले एक खिलाड़ी जोड़ें।");
+            return;
+        }
+        const player = players[currentPlayer];
+        const num = selectedNumbers[0];
+        player.counts[num] = (player.counts[num] || 0) + 1;
+        player.amounts[num] = (player.amounts[num] || 0) + amount;
+        updateSelections();
+        resetSelection();
+        saveOfflineState();
+    });
+
+    addSelectedButton.addEventListener("click", function () {
+        if (roundClosed || selectedNumbers.length === 0) return;
+
+        const amtVal = amountInput.value.trim();
+        const amount = amtVal === "" ? 0 : Number(amtVal);
+        if (Number.isNaN(amount) || amount < 0) {
+            alert('कृपया वैध राशि डालें।');
+            return;
+        }
+
+        if (socket) {
+            socket.emit('addMultipleNumbers', { numbers: selectedNumbers, amount: amount });
+            resetSelection();
+            return;
+        }
+
+        // Offline/local mode: add all selected numbers
+        if (!currentPlayer) {
+            alert("कृपया पहले एक खिलाड़ी जोड़ें।");
+            return;
+        }
+        const player = players[currentPlayer];
+        selectedNumbers.forEach(function(num) {
+            player.counts[num] = (player.counts[num] || 0) + 1;
+            player.amounts[num] = (player.amounts[num] || 0) + amount;
+        });
+        updateSelections();
+        resetSelection();
+        saveOfflineState();
+    });
+
+    clearSelectedButton.addEventListener("click", function () {
+        resetSelection();
+        createNumbers();
+    });
+
+    nextPlayerButton.addEventListener("click", function () {
+        if (roundClosed) return;
+        
+        const playerNameVal = playerNameInput.value.trim();
+        if (playerNameVal === "") {
+            alert("कृपया खिलाड़ी का नाम दर्ज करें।");
+            return;
+        }
+        
+        if (socket) {
+            socket.emit('newPlayer', { name: playerNameVal });
+            resetSelection();
+            playerNameInput.value = "";
+            return;
+        }
+        
+        setCurrentPlayer(playerNameVal);
+        resetSelection();
+        playerNameInput.value = "";
+        saveOfflineState();
+    });
+
+    drawButton.addEventListener("click", function () {
+        if (roundClosed) return;
+        const value = drawNumberInput.value.trim();
+        if (value === "") {
+            alert("कृपया DRAW नंबर चुनें।");
+            return;
+        }
+
+        winningNumber = Number(value);
+        if (Number.isNaN(winningNumber) || winningNumber < 0 || winningNumber > 100) {
+            alert("DRAW नंबर 0 से 100 के बीच होना चाहिए।");
+            return;
+        }
+
+        if (socket) {
+            socket.emit('draw', { winningNumber: winningNumber });
+            return;
+        }
+
+        // Offline draw logic
+        resultDisplay.textContent = winningNumber;
+        updateDrawDetails(winningNumber);
+
+        roundClosed = true;
+        statusDisplay.textContent = "Round Closed";
+        drawButton.disabled = true;
+        addNumberButton.disabled = true;
+        addSelectedButton.disabled = true;
+        nextPlayerButton.disabled = true;
+        drawNumberInput.disabled = true;
+        document.querySelectorAll(".number").forEach(function(btn) { btn.disabled = true; });
+        
+        // Apply yellow color to winning number
+        createNumbers();
+
+        history.unshift({ round: roundNumber, result: winningNumber });
+        updateHistory();
+        saveOfflineState();
+    });
+
+    function updateDrawDetails(number) {
+        const betItems = [];
+        let totalAmount = 0;
+
+        Object.keys(players).forEach(function(serialName) {
+            const player = players[serialName];
+            const count = player.counts[number] || 0;
+            if (count > 0) {
+                const amount = player.amounts[number] || 0;
+                totalAmount += amount;
+                betItems.push(player.name + " (" + count + "x, ₹" + amount + ")");
+            }
+        });
+
+        if (betItems.length === 0) {
+            winnerInfo.textContent = "Number " + number + " पर किसी ने पैसा नहीं लगाया।";
+        } else {
+            winnerInfo.textContent = "Number " + number + " पर: " + betItems.join(", ") + " | कुल: ₹" + totalAmount;
+        }
+    }
+
+    newRoundButton.addEventListener("click", function () {
+        if (!roundClosed) {
+            alert("पहले इस Round का DRAW पूरा करें।");
+            return;
+        }
+
+        roundNumber++;
+        roundDisplay.textContent = String(roundNumber).padStart(4, "0");
+        selectedNumber = null;
+        selectedNumbers = [];
+        winningNumber = null;
+        selectedDisplay.textContent = "None";
+        resultDisplay.textContent = "?";
+        statusDisplay.textContent = "Round Open";
+        roundClosed = false;
+        playerCount = 0;
+        Object.keys(players).forEach(function(key) { delete players[key]; });
+        Object.keys(amountTotals).forEach(function(k){ delete amountTotals[k]; });
+        currentPlayer = null;
+        currentPlayerDisplay.textContent = "Current Player: None";
+        playerNameInput.value = "";
+        drawNumberInput.disabled = false;
+        drawNumberInput.value = "";
+        winnerInfo.textContent = "No winners yet.";
+        document.getElementById('minAmountInfo').textContent = 'Lowest amount number: None';
+        document.getElementById('grandTotal').textContent = 'Total Amount: ₹0';
+        addNumberButton.disabled = true;
+        addSelectedButton.disabled = true;
+        clearSelectedButton.disabled = true;
+        nextPlayerButton.disabled = false;
+        createNumbers();
+        updateSelections();
+        saveOfflineState();
+    });
+
+    function updateHistory() {
+        historyList.innerHTML = "";
+        history.forEach(function(item) {
+            const div = document.createElement("div");
+            div.className = "history-item";
+            div.textContent = "Round #" + String(item.round).padStart(4, "0") + "  →  Winning Number: " + item.result;
+            historyList.appendChild(div);
+        });
+    }
+
+    createNumbers();
+    updateSelections();
+
+    if ("serviceWorker" in navigator && (location.protocol === "http:" || location.protocol === "https:")) {
+        navigator.serviceWorker.register("service-worker.js");
+    }
+</script>
+
+</body>
+</html>
